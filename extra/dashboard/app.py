@@ -55,16 +55,19 @@ def run(from_results_dir, datasource, port, mode="rate"):
          "version": ["default", "default"],
          "model": ["default", "default"]})
 
-    def load_demo(model_bench, max_qps, percentiles):
-        return update_bench(model_bench, max_qps, percentiles)
+    def load_demo(model_bench, run_id_filter, max_qps, percentiles):
+        return update_bench(model_bench, run_id_filter, max_qps, percentiles)
 
-    def update_bench(model, max_qps, percentiles):
+    def update_bench(model, run_id_filter, max_qps, percentiles):
         res = []
         for plot in line_plots_bench:
             if plot['config'].percentiles:
                 k = plot['metric'] + '_' + str(percentiles)
                 df_bench[plot['metric']] = df_bench[k] if k in df_bench.columns else 0
-            res.append(df_bench[(df_bench['model'] == model) & (df_bench['rate'] <= max_qps)])
+            if len(run_id_filter) > 0:
+                res.append(df_bench[(df_bench['model'] == model) & (df_bench['rate'] <= max_qps) & (df_bench['run_id'].isin(run_id_filter))])
+            else:
+                res.append(df_bench[(df_bench['model'] == model) & (df_bench['rate'] <= max_qps)])
 
         return res + [metadata_table(), summary_table()]
 
@@ -182,6 +185,8 @@ def run(from_results_dir, datasource, port, mode="rate"):
         with gr.Row():
             model = gr.Dropdown(list(models), label="Select model", value=models[0])
         with gr.Row():
+            run_id_filter = gr.Dropdown(list(run_ids), multiselect=True, label="Select run IDS", value=[])
+        with gr.Row():
             max_qps = gr.Number(label=f"Max {x_title}", value=max_x_value)
         with gr.Row():
             metadata = gr.DataFrame(
@@ -208,14 +213,15 @@ def run(from_results_dir, datasource, port, mode="rate"):
                 )
                 i += 1
 
-        for component in [model, max_qps, percentiles_bench]:
-            component.change(update_bench, [model, max_qps, percentiles_bench],
+        update_params = [model, run_id_filter, max_qps, percentiles_bench]
+        for component in update_params:
+            component.change(update_bench, update_params,
                              [item["component"] for item in line_plots_bench] + [metadata, table])
         gr.on([plot["component"].select for plot in line_plots_bench], select_region, [model],
               outputs=[item["component"] for item in line_plots_bench])
         gr.on([plot["component"].double_click for plot in line_plots_bench], reset_region, None,
               outputs=[item["component"] for item in line_plots_bench])
-        demo.load(load_demo, [model, max_qps, percentiles_bench],
+        demo.load(load_demo, update_params,
                   [item["component"] for item in line_plots_bench] + [metadata, table])
 
     demo.launch(server_port=port, server_name="0.0.0.0")
