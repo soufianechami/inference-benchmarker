@@ -16,7 +16,7 @@ struct Args {
     tokenizer_name: String,
 
     /// The source of the tokenizer to use (hub or local)
-    #[clap(default_value = "hub", short, long, env, value_parser = parse_tokenizer_source)]
+    #[clap(default_value = "hub", long, env, value_parser = parse_tokenizer_source)]
     tokenizer_source: TokenizerSource,
 
     /// The name of the model to use. If not provided, the same name as the tokenizer will be used.
