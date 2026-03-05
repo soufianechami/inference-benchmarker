@@ -17,8 +17,7 @@ extra/dashboard/output.xlsx
 extra/dashboard/benchmarks.parquet
 
 # Local benchmarking folders
-ovh-benchmarking/
-sambanova-benchmarking/
+*-benchmarking/
 
 # OS
 .DS_Store
@@ -39,7 +38,4 @@ test_curl*.sh
 notes/
 
 # One-off retry/test scripts
-run_remaining.sh
-run_retry.sh
-run_input_heavy.sh
-ric_fabien.sh
+run_*.sh

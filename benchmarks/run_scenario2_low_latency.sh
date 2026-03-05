@@ -19,8 +19,8 @@ RESULTS_DIR="${SCRIPT_DIR}/../results"
 mkdir -p "$RESULTS_DIR"
 RESULTS_ABS="$(cd "$RESULTS_DIR" && pwd)"
 
-URL="${SAMBANOVA_URL:?Set SAMBANOVA_URL}"
-API_KEY="${SAMBANOVA_API_KEY:?Set SAMBANOVA_API_KEY}"
+URL="${BASE_URL:?Set BASE_URL}"
+API_KEY="${API_KEY:?Set API_KEY}"
 TOKENIZER="${TOKENIZER:-openai/gpt-oss-120b}"
 MODEL="${MODEL:-gpt-oss-120b}"
 HARDWARE="${HARDWARE:-sn40l}"          # sn40l | h200 | b200 — tag in results

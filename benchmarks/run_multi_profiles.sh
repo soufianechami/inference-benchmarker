@@ -7,8 +7,8 @@
 #   output-heavy-1k-7k Long generation (1k in, 7k out)
 #
 # Usage:
-#   export SAMBANOVA_URL=https://your-endpoint
-#   export SAMBANOVA_API_KEY=your-key
+#   export BASE_URL=https://your-endpoint
+#   export API_KEY=your-key
 #   bash benchmarks/run_multi_profiles.sh
 #
 # Requires: Docker with a built inference-benchmarker image.
@@ -22,11 +22,14 @@ RESULTS_DIR="${SCRIPT_DIR}/../results"
 mkdir -p "$RESULTS_DIR"
 RESULTS_ABS="$(cd "$RESULTS_DIR" && pwd)"
 
-URL="${SAMBANOVA_URL:?Set SAMBANOVA_URL}"
-API_KEY="${SAMBANOVA_API_KEY:?Set SAMBANOVA_API_KEY}"
+URL="${BASE_URL:?Set BASE_URL}"
+API_KEY="${API_KEY:?Set API_KEY}"
 DOCKER_IMAGE="${DOCKER_IMAGE:-inference-benchmarker:local}"
 MODEL="gpt-oss-120b"
 TOKENIZER="openai/gpt-oss-120b"
+# metadata
+ENGINE="default"    # e.g. vllm, sglang..
+TP=1                # tensor parallel size
 
 WARMUP="30s"
 MAX_VUS="2000"
@@ -66,7 +69,7 @@ run_profile() {
     --run-id "$profile" \
     --prompt-options "$prompt_opts" \
     --decode-options "$decode_opts" \
-    --extra-meta "profile=${profile},engine=sambanova,tp=1" \
+    --extra-meta "profile=${profile},engine=${ENGINE},tp=${TP}" \
     --no-console \
     2>&1 | tee -a "${RESULTS_ABS}/${profile}.log"
 
