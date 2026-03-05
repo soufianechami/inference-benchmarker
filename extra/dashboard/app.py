@@ -36,7 +36,8 @@ def run(from_results_dir, datasource, port, mode="rate"):
     * Time to First Token: Time the user has to wait before seeing the first token of its answer. 
       Lower waiting time are essential for real-time interactions, less so for offline workloads.
     * End-to-end latency: The overall time the system took to generate the full response to the user.
-    * Throughput: The number of tokens per second the system can generate across all requests
+    * System Throughput: Total tokens per second the system generates across ALL concurrent requests (scales with concurrency)
+    * Per-Request Speed: Tokens per second experienced by a single user (decoded tokens / E2E latency). Degrades under load.
     * Successful requests: The number of requests the system was able to honor in the benchmark timeframe
     * Error rate: The percentage of requests that ended up in error, as the system could not process them in time or failed to process them. 
           
@@ -144,8 +145,10 @@ def run(from_results_dir, datasource, port, mode="rate"):
                                              y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
         "e2e_latency_ms": PlotConfig(title="End to End Latency (lower is better)", x_title=x_title,
                                      y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
-        "token_throughput_secs": PlotConfig(title="Request Output Throughput (higher is better)", x_title=x_title,
+        "token_throughput_secs": PlotConfig(title="System Throughput — total tok/s across all requests (higher is better)", x_title=x_title,
                                             y_title="Tokens/s"),
+        "per_request_speed": PlotConfig(title="Per-Request Speed — tok/s per user (higher is better)", x_title=x_title,
+                                         y_title="Tokens/s/req"),
         "successful_requests": PlotConfig(title="Successful requests (higher is better)", x_title=x_title,
                                           y_title="Count"),
         "error_rate": PlotConfig(title="Error rate", x_title=x_title, y_title="%"),

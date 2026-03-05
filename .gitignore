@@ -1,12 +1,45 @@
+# Rust
 debug/
 target/
 Cargo.lock
 **/*.rs.bk
 *.pdb
-__pycache__/
 
-*.json
-*.txt
-results
+# Python
+__pycache__/
 *.parquet
+*.pyc
+
+# Results & logs
+*.txt
+results/
+extra/dashboard/output.xlsx
+extra/dashboard/benchmarks.parquet
+
+# Local benchmarking folders
+ovh-benchmarking/
+sambanova-benchmarking/
+
+# OS
+.DS_Store
+
+# IDE / editor
+.windsurf/
+.claude/
+openmemory.md
 *.dev.*
+
+# Temp scripts & scripts with keys
+test_curl*.sh
+
+# Env & secrets
+.env
+
+# Notes (private)
+notes/
+
+# One-off retry/test scripts
+run_remaining.sh
+run_retry.sh
+run_input_heavy.sh
+ric_fabien.sh

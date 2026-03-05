@@ -191,7 +191,10 @@ impl TextGenerationBackend for OpenAITextGenerationBackend {
                         .unwrap();
                     let content = delta
                         .content
-                        .unwrap_or(delta.reasoning_content.unwrap_or(delta.reasoning.unwrap_or("".to_string())));
+                        .filter(|s| !s.is_empty())
+                        .or(delta.reasoning_content.filter(|s| !s.is_empty()))
+                        .or(delta.reasoning.filter(|s| !s.is_empty()))
+                        .unwrap_or_default();
                     if content.is_empty() {
                         // skip empty responses
                         continue;
