@@ -807,11 +807,19 @@ impl TextGenerationAggregatedResponse {
 
     fn add_tokens(&mut self, num_tokens: u64) {
         self.num_generated_tokens += num_tokens;
-        let mut time_to_generate = self.last_received_token_time.elapsed();
-        // make the assumption that when returned simultaneously, tokens were generated at a constant rate
-        time_to_generate = time_to_generate.checked_div(num_tokens as u32).unwrap();
+        let time_to_generate = self.last_received_token_time.elapsed();
+        match num_tokens {
+            0 => {}
+            1 => {
+                self.times_to_tokens.push(time_to_generate);
+            }
+            _ => {
+                // make the assumption that when returned simultaneously, tokens were generated at a constant rate
+                let time_to_generate_per_token = time_to_generate.checked_div(num_tokens as u32).unwrap();
+                self.times_to_tokens.extend(vec![time_to_generate_per_token; num_tokens as usize]);
+            }
+        }
         self.last_received_token_time = tokio::time::Instant::now();
-        self.times_to_tokens.extend(vec![time_to_generate; num_tokens as usize]);
     }
 
     pub fn time_to_first_token(&self) -> Option<std::time::Duration> {
