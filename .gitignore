@@ -12,12 +12,14 @@ __pycache__/
 
 # Results & logs
 *.txt
+*.log
 results/
 extra/dashboard/output.xlsx
 extra/dashboard/benchmarks.parquet
 
 # Local benchmarking folders
-*-benchmarking/
+ovh-benchmarking/
+sambanova-benchmarking/
 
 # OS
 .DS_Store
@@ -38,4 +40,10 @@ test_curl*.sh
 notes/
 
 # One-off retry/test scripts
-run_*.sh
+run_remaining.sh
+run_retry.sh
+run_input_heavy.sh
+ric_fabien.sh
+
+# OpenMemory - IDE/Assistant specific rules
+.windsurf/rules/openmemory.md

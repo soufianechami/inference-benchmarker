@@ -139,16 +139,16 @@ def run(from_results_dir, datasource, port, mode="rate"):
     print(df_bench["request_rate"])
     # Define metrics
     metrics = {
-        "inter_token_latency_ms": PlotConfig(title="Inter Token Latency (lower is better)", x_title=x_title,
-                                             y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
+        "per_request_speed": PlotConfig(title="Per-Request Speed — tok/s per user (higher is better)", x_title=x_title,
+                                    y_title="Tokens/s/req"),
         "time_to_first_token_ms": PlotConfig(title="TTFT (lower is better)", x_title=x_title,
                                              y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
         "e2e_latency_ms": PlotConfig(title="End to End Latency (lower is better)", x_title=x_title,
                                      y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
         "token_throughput_secs": PlotConfig(title="System Throughput — total tok/s across all requests (higher is better)", x_title=x_title,
                                             y_title="Tokens/s"),
-        "per_request_speed": PlotConfig(title="Per-Request Speed — tok/s per user (higher is better)", x_title=x_title,
-                                         y_title="Tokens/s/req"),
+        "inter_token_latency_ms": PlotConfig(title="Inter Token Latency (lower is better)", x_title=x_title,
+                                             y_title="Time (ms)", percentiles=[0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99]),
         "successful_requests": PlotConfig(title="Successful requests (higher is better)", x_title=x_title,
                                           y_title="Count"),
         "error_rate": PlotConfig(title="Error rate", x_title=x_title, y_title="%"),

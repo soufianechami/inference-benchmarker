@@ -18,6 +18,16 @@ pub struct PercentilesWriter {
 }
 
 #[derive(Serialize)]
+pub struct RawResponseWriter {
+    pub num_prompt_tokens: u64,
+    pub num_decode_tokens: Option<u64>,
+    pub num_generated_tokens: u64,
+    pub ttft_ms: f64,
+    pub e2e_latency_ms: f64,
+    pub failed: bool,
+}
+
+#[derive(Serialize)]
 pub struct BenchmarkResultsWriter {
     id: String,
     executor_type: String,
@@ -120,6 +130,12 @@ impl SystemInfo {
 }
 
 #[derive(Serialize)]
+pub struct RawResponsesResultWriter {
+    id: String,
+    responses: Vec<RawResponseWriter>,
+}
+
+#[derive(Serialize)]
 pub struct BenchmarkReportWriter {
     config: BenchmarkConfig,
     results: Vec<BenchmarkResultsWriter>,
@@ -128,6 +144,8 @@ pub struct BenchmarkReportWriter {
     system: SystemInfo,
     #[serde(skip)]
     report: BenchmarkReport,
+    #[serde(skip)]
+    raw_results: Vec<RawResponsesResultWriter>,
 }
 
 impl BenchmarkReportWriter {
@@ -136,13 +154,37 @@ impl BenchmarkReportWriter {
         report: BenchmarkReport,
     ) -> anyhow::Result<BenchmarkReportWriter> {
         let mut results: Vec<BenchmarkResultsWriter> = Vec::new();
+        let mut raw_results: Vec<RawResponsesResultWriter> = Vec::new();
         for result in report.get_results() {
+            let raw = RawResponsesResultWriter {
+                id: result.id.clone(),
+                responses: result.get_responses().iter().map(|r| {
+                    let request = r.request.as_ref().unwrap();
+                    let ttft_ms = r.times_to_tokens.first()
+                        .map(|d| d.as_micros() as f64 / 1000.)
+                        .unwrap_or(0.0);
+                    let e2e_ms = match (r.start_time, r.end_time) {
+                        (Some(start), Some(end)) => (end - start).as_micros() as f64 / 1000.,
+                        _ => 0.0,
+                    };
+                    RawResponseWriter {
+                        num_prompt_tokens: request.num_prompt_tokens,
+                        num_decode_tokens: request.num_decode_tokens,
+                        num_generated_tokens: r.num_generated_tokens,
+                        ttft_ms,
+                        e2e_latency_ms: e2e_ms,
+                        failed: r.failed,
+                    }
+                }).collect(),
+            };
+            raw_results.push(raw);
             let writer = BenchmarkResultsWriter::new(result)?;
             results.push(writer);
         }
         Ok(BenchmarkReportWriter {
             config,
             results,
+            raw_results,
             start_time: report
                 .start_time()
                 .ok_or(anyhow::anyhow!("start_time not set"))?
@@ -166,6 +208,15 @@ impl BenchmarkReportWriter {
             }
         }
         fs::write(path, report).await?;
+
+        // write raw responses to a separate file: <name>_raw.json
+        let raw_path = path.with_file_name(format!(
+            "{}_raw.json",
+            path.file_stem().unwrap_or_default().to_string_lossy()
+        ));
+        let raw_report = serde_json::to_string(&self.raw_results)?;
+        fs::write(raw_path, raw_report).await?;
+
         Ok(())
     }
 
