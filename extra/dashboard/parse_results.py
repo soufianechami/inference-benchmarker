@@ -42,7 +42,7 @@ def build_results_df(results_dir) -> pd.DataFrame:
         # list json files in results directory
         data_files = {}
         for filename in os.listdir(directory):
-            if filename.endswith('.json'):
+            if filename.endswith('.json') and not filename.endswith('_raw.json'):
                 data_files[filename.split('.')[-2]] = f'{directory}/{filename}'
         df = pd.concat([df, build_df(directory.split('/')[-1], data_files)])
     return df
